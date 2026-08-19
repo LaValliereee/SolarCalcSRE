@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../providers/beban_provider.dart';
 import '../../providers/hasil_provider.dart';
+import '../../providers/riwayat_provider.dart';
 import 'widgets/breakdown_chart.dart';
 import 'widgets/metric_card.dart';
 import 'widgets/perbandingan_baterai_card.dart';
@@ -85,6 +86,12 @@ class HasilScreen extends ConsumerWidget {
         const SizedBox(height: 20),
         BreakdownChart(bebanList: bebanList),
         const SizedBox(height: 20),
+        FilledButton.icon(
+          onPressed: () => _tampilkanDialogSimpan(context, ref),
+          icon: const Icon(Icons.save_outlined),
+          label: const Text('Simpan proyek'),
+        ),
+        const SizedBox(height: 8),
         FilledButton.tonalIcon(
           onPressed: () {
             // TODO: hubungkan ke pdf_export_service.dart setelah dibuat
@@ -96,6 +103,63 @@ class HasilScreen extends ConsumerWidget {
           label: const Text('Export PDF'),
         ),
       ],
+    );
+  }
+
+  void _tampilkanDialogSimpan(BuildContext context, WidgetRef ref) {
+    final namaController = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Simpan proyek'),
+          content: Form(
+            key: formKey,
+            child: TextFormField(
+              controller: namaController,
+              autofocus: true,
+              decoration: const InputDecoration(
+                labelText: 'Nama proyek',
+                hintText: 'Contoh: Rumah Pak Budi - Gresik',
+              ),
+              validator: (v) =>
+                  (v == null || v.trim().isEmpty) ? 'Wajib diisi' : null,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Batal'),
+            ),
+            FilledButton(
+              onPressed: () async {
+                if (!formKey.currentState!.validate()) return;
+                final namaProyek = namaController.text.trim();
+                final navigator = Navigator.of(context);
+                final messenger = ScaffoldMessenger.of(context);
+
+                try {
+                  await ref
+                      .read(riwayatProvider.notifier)
+                      .simpanProyekSaatIni(namaProyek);
+                  navigator.pop();
+                  messenger.showSnackBar(
+                    SnackBar(content: Text('Proyek "$namaProyek" berhasil disimpan')),
+                  );
+                } catch (e) {
+                  navigator.pop();
+                  messenger.showSnackBar(
+                    SnackBar(content: Text('Gagal menyimpan: $e')),
+                  );
+                }
+              },
+              child: const Text('Simpan'),
+            ),
+          ],
+        );
+      },
     );
   }
 }
