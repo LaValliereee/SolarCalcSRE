@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/theme.dart';
 import '../../providers/beban_provider.dart';
 import '../hasil/hasil_screen.dart';
 import '../riwayat/riwayat_screen.dart';
@@ -21,10 +22,23 @@ class HomeScreen extends StatelessWidget {
           title: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              CircleAvatar(
-                radius: 16,
-                backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                child: const Icon(Icons.wb_sunny_outlined, size: 18),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.asset(
+                  'assets/images/logo.png',
+                  width: 32,
+                  height: 32,
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) => CircleAvatar(
+                    radius: 16,
+                    backgroundColor: AppTheme.primaryTeal.withValues(alpha: 0.15),
+                    child: const Icon(
+                      Icons.wb_sunny_outlined,
+                      size: 18,
+                      color: AppTheme.primaryTeal,
+                    ),
+                  ),
+                ),
               ),
               const SizedBox(width: 10),
               const Column(

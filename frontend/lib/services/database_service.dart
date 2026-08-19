@@ -1,5 +1,8 @@
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
-import 'package:sqflite/sqflite.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 import '../models/riwayat_proyek.dart';
 
@@ -9,17 +12,34 @@ import '../models/riwayat_proyek.dart';
 /// Karena aplikasi ini dipakai sebagai tool personal (bukan multi-user
 /// dengan data terpusat), semua riwayat cukup disimpan di database lokal
 /// per device, tanpa perlu backend server.
+///
+/// Catatan platform: sqflite native hanya jalan di Android/iOS. Untuk
+/// memudahkan development/testing di Windows/Linux/macOS desktop,
+/// databaseFactory diarahkan ke sqflite_common_ffi. Web tidak didukung
+/// sama sekali oleh sqflite (baik native maupun ffi), jadi fitur riwayat
+/// hanya bisa dites di Android/iOS/desktop, tidak di Chrome.
 class DatabaseService {
   static final DatabaseService _instance = DatabaseService._internal();
   factory DatabaseService() => _instance;
   DatabaseService._internal();
 
   static Database? _db;
+  static bool _ffiInitialized = false;
 
   static const String _tableName = 'riwayat_proyek';
 
+  void _pastikanFfiSiap() {
+    if (_ffiInitialized) return;
+    if (!kIsWeb && (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
+      sqfliteFfiInit();
+      databaseFactory = databaseFactoryFfi;
+    }
+    _ffiInitialized = true;
+  }
+
   Future<Database> get database async {
     if (_db != null) return _db!;
+    _pastikanFfiSiap();
     _db = await _initDb();
     return _db!;
   }

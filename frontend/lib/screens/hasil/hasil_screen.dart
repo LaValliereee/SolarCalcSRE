@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../models/beban_item.dart';
 import '../../models/hasil_perhitungan.dart';
+import '../../core/theme.dart';
 import '../../providers/beban_provider.dart';
 import '../../providers/hasil_provider.dart';
 import '../../providers/parameter_provider.dart';
@@ -79,13 +80,13 @@ class HasilScreen extends ConsumerWidget {
         PerbandinganBateraiCard(
           namaBaterai: 'VRLA (DoD 50%)',
           hasil: hasil.vrla,
-          warna: Colors.teal,
+          warna: AppTheme.warnaVrla,
         ),
         const SizedBox(height: 8),
         PerbandinganBateraiCard(
           namaBaterai: 'LiFePO4 (DoD 80%)',
           hasil: hasil.lifepo4,
-          warna: Colors.deepPurple,
+          warna: AppTheme.warnaLifepo4,
         ),
         const SizedBox(height: 20),
         BreakdownChart(bebanList: bebanList),

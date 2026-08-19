@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'core/theme.dart';
 import 'screens/home/home_screen.dart';
 
 /// Widget root aplikasi SolaCalcSRE.
@@ -11,10 +12,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'SolaCalcSRE',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorSchemeSeed: Colors.teal,
-        useMaterial3: true,
-      ),
+      theme: AppTheme.light,
       home: const HomeScreen(),
     );
   }
