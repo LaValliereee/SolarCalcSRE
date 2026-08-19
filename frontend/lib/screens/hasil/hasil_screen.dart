@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../models/beban_item.dart';
+import '../../models/hasil_perhitungan.dart';
 import '../../providers/beban_provider.dart';
 import '../../providers/hasil_provider.dart';
+import '../../providers/parameter_provider.dart';
 import '../../providers/riwayat_provider.dart';
+import '../../services/pdf_export_service.dart';
 import 'widgets/breakdown_chart.dart';
 import 'widgets/metric_card.dart';
 import 'widgets/perbandingan_baterai_card.dart';
@@ -93,12 +97,7 @@ class HasilScreen extends ConsumerWidget {
         ),
         const SizedBox(height: 8),
         FilledButton.tonalIcon(
-          onPressed: () {
-            // TODO: hubungkan ke pdf_export_service.dart setelah dibuat
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Export PDF belum diimplementasikan')),
-            );
-          },
+          onPressed: () => _tampilkanDialogNamaLaluExport(context, ref, bebanList, hasil),
           icon: const Icon(Icons.download_outlined),
           label: const Text('Export PDF'),
         ),
@@ -106,22 +105,94 @@ class HasilScreen extends ConsumerWidget {
     );
   }
 
-  void _tampilkanDialogSimpan(BuildContext context, WidgetRef ref) {
+  Future<void> _tampilkanDialogNamaLaluExport(
+    BuildContext context,
+    WidgetRef ref,
+    List<BebanItem> bebanList,
+    HasilPerhitungan hasil,
+  ) async {
+    final namaProyek = await _tampilkanDialogInputNama(
+      context,
+      judulDialog: 'Export PDF',
+      labelInput: 'Nama proyek',
+      teksTombol: 'Export',
+    );
+    if (namaProyek == null) return; // dibatalkan
+    if (!context.mounted) return;
+    await _exportPdf(context, ref, bebanList, hasil, namaProyek);
+  }
+
+  Future<void> _exportPdf(
+    BuildContext context,
+    WidgetRef ref,
+    List<BebanItem> bebanList,
+    HasilPerhitungan hasil,
+    String namaProyek,
+  ) async {
+    final parameter = ref.read(parameterProvider);
+    final messenger = ScaffoldMessenger.of(context);
+
+    try {
+      await PdfExportService.exportDanBagikan(
+        namaProyek: namaProyek,
+        bebanList: bebanList,
+        parameter: parameter,
+        hasil: hasil,
+      );
+    } catch (e) {
+      messenger.showSnackBar(
+        SnackBar(content: Text('Gagal export PDF: $e')),
+      );
+    }
+  }
+
+  void _tampilkanDialogSimpan(BuildContext context, WidgetRef ref) async {
+    final namaProyek = await _tampilkanDialogInputNama(
+      context,
+      judulDialog: 'Simpan proyek',
+      labelInput: 'Nama proyek',
+      teksTombol: 'Simpan',
+    );
+    if (namaProyek == null) return; // dibatalkan
+    if (!context.mounted) return;
+
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await ref.read(riwayatProvider.notifier).simpanProyekSaatIni(namaProyek);
+      messenger.showSnackBar(
+        SnackBar(content: Text('Proyek "$namaProyek" berhasil disimpan')),
+      );
+    } catch (e) {
+      messenger.showSnackBar(
+        SnackBar(content: Text('Gagal menyimpan: $e')),
+      );
+    }
+  }
+
+  /// Dialog reusable untuk minta input nama proyek.
+  /// Dipakai baik untuk "Simpan proyek" maupun "Export PDF", supaya
+  /// tidak ada duplikasi kode dialog. Return null kalau dibatalkan.
+  Future<String?> _tampilkanDialogInputNama(
+    BuildContext context, {
+    required String judulDialog,
+    required String labelInput,
+    required String teksTombol,
+  }) {
     final namaController = TextEditingController();
     final formKey = GlobalKey<FormState>();
 
-    showDialog(
+    return showDialog<String>(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Simpan proyek'),
+          title: Text(judulDialog),
           content: Form(
             key: formKey,
             child: TextFormField(
               controller: namaController,
               autofocus: true,
-              decoration: const InputDecoration(
-                labelText: 'Nama proyek',
+              decoration: InputDecoration(
+                labelText: labelInput,
                 hintText: 'Contoh: Rumah Pak Budi - Gresik',
               ),
               validator: (v) =>
@@ -134,28 +205,11 @@ class HasilScreen extends ConsumerWidget {
               child: const Text('Batal'),
             ),
             FilledButton(
-              onPressed: () async {
+              onPressed: () {
                 if (!formKey.currentState!.validate()) return;
-                final namaProyek = namaController.text.trim();
-                final navigator = Navigator.of(context);
-                final messenger = ScaffoldMessenger.of(context);
-
-                try {
-                  await ref
-                      .read(riwayatProvider.notifier)
-                      .simpanProyekSaatIni(namaProyek);
-                  navigator.pop();
-                  messenger.showSnackBar(
-                    SnackBar(content: Text('Proyek "$namaProyek" berhasil disimpan')),
-                  );
-                } catch (e) {
-                  navigator.pop();
-                  messenger.showSnackBar(
-                    SnackBar(content: Text('Gagal menyimpan: $e')),
-                  );
-                }
+                Navigator.pop(context, namaController.text.trim());
               },
-              child: const Text('Simpan'),
+              child: Text(teksTombol),
             ),
           ],
         );
