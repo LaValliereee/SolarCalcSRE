@@ -49,8 +49,10 @@ class KalkulasiService {
     required double wpPanel,
   }) {
     // Koreksi daya dengan efisiensi inverter
-    final dayaTerkoreksiInverter =
-        koreksiEfisiensi(totalWattHours, efisiensiInverter);
+    final dayaTerkoreksiInverter = koreksiEfisiensi(
+      totalWattHours,
+      efisiensiInverter,
+    );
 
     // Jumlah aki mentah = daya terkoreksi / (V x Ah)
     final jumlahAkiMentah = dayaTerkoreksiInverter / (voltAki * kapasitasAh);

@@ -24,25 +24,25 @@ class RiwayatProyek {
     required this.parameter,
     required this.hasil,
     DateTime? dibuatPada,
-  })  : id = id ?? const Uuid().v4(),
-        dibuatPada = dibuatPada ?? DateTime.now();
+  }) : id = id ?? const Uuid().v4(),
+       dibuatPada = dibuatPada ?? DateTime.now();
 
   /// Dikonversi ke Map untuk disimpan sebagai satu baris di SQLite.
   /// Field kompleks (beban, parameter) disimpan sebagai string JSON
   /// dalam satu kolom, supaya skema tabel tetap sederhana.
   Map<String, dynamic> toDbMap() => {
-        'id': id,
-        'nama_proyek': namaProyek,
-        'beban_json': jsonEncode(bebanList.map((b) => b.toJson()).toList()),
-        'parameter_json': jsonEncode(parameter.toJson()),
-        'total_daya_watt': hasil.totalDayaWatt,
-        'total_watt_hours': hasil.totalWattHours,
-        'jumlah_aki_vrla': hasil.vrla.jumlahAki,
-        'jumlah_panel_vrla': hasil.vrla.jumlahPanel,
-        'jumlah_aki_lifepo4': hasil.lifepo4.jumlahAki,
-        'jumlah_panel_lifepo4': hasil.lifepo4.jumlahPanel,
-        'dibuat_pada': dibuatPada.toIso8601String(),
-      };
+    'id': id,
+    'nama_proyek': namaProyek,
+    'beban_json': jsonEncode(bebanList.map((b) => b.toJson()).toList()),
+    'parameter_json': jsonEncode(parameter.toJson()),
+    'total_daya_watt': hasil.totalDayaWatt,
+    'total_watt_hours': hasil.totalWattHours,
+    'jumlah_aki_vrla': hasil.vrla.jumlahAki,
+    'jumlah_panel_vrla': hasil.vrla.jumlahPanel,
+    'jumlah_aki_lifepo4': hasil.lifepo4.jumlahAki,
+    'jumlah_panel_lifepo4': hasil.lifepo4.jumlahPanel,
+    'dibuat_pada': dibuatPada.toIso8601String(),
+  };
 
   factory RiwayatProyek.fromDbMap(Map<String, dynamic> map) {
     final bebanJson = jsonDecode(map['beban_json'] as String) as List;

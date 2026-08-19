@@ -44,7 +44,11 @@ class ParameterSistem {
 
   ParameterSistem copyWith({
     JenisScc? jenisScc,
+    double? efisiensiPwm,
+    double? efisiensiMppt,
     JenisInverter? jenisInverter,
+    double? efisiensiPsw,
+    double? efisiensiMsw,
     double? kapasitasAkiAh,
     double? voltAki,
     double? wpPanel,
@@ -52,11 +56,11 @@ class ParameterSistem {
   }) {
     return ParameterSistem(
       jenisScc: jenisScc ?? this.jenisScc,
-      efisiensiPwm: efisiensiPwm,
-      efisiensiMppt: efisiensiMppt,
+      efisiensiPwm: efisiensiPwm ?? this.efisiensiPwm,
+      efisiensiMppt: efisiensiMppt ?? this.efisiensiMppt,
       jenisInverter: jenisInverter ?? this.jenisInverter,
-      efisiensiPsw: efisiensiPsw,
-      efisiensiMsw: efisiensiMsw,
+      efisiensiPsw: efisiensiPsw ?? this.efisiensiPsw,
+      efisiensiMsw: efisiensiMsw ?? this.efisiensiMsw,
       kapasitasAkiAh: kapasitasAkiAh ?? this.kapasitasAkiAh,
       voltAki: voltAki ?? this.voltAki,
       wpPanel: wpPanel ?? this.wpPanel,
@@ -66,7 +70,11 @@ class ParameterSistem {
 
   Map<String, dynamic> toJson() => {
         'jenis_scc': jenisScc.name.toUpperCase(),
+        'efisiensi_pwm': efisiensiPwm,
+        'efisiensi_mppt': efisiensiMppt,
         'jenis_inverter': jenisInverter.name.toUpperCase(),
+        'efisiensi_psw': efisiensiPsw,
+        'efisiensi_msw': efisiensiMsw,
         'kapasitas_aki_ah': kapasitasAkiAh,
         'volt_aki': voltAki,
         'wp_panel': wpPanel,
@@ -78,9 +86,13 @@ class ParameterSistem {
       jenisScc: (json['jenis_scc'] as String).toUpperCase() == 'PWM'
           ? JenisScc.pwm
           : JenisScc.mppt,
+      efisiensiPwm: (json['efisiensi_pwm'] as num?)?.toDouble() ?? 60,
+      efisiensiMppt: (json['efisiensi_mppt'] as num?)?.toDouble() ?? 90,
       jenisInverter: (json['jenis_inverter'] as String).toUpperCase() == 'MSW'
           ? JenisInverter.msw
           : JenisInverter.psw,
+      efisiensiPsw: (json['efisiensi_psw'] as num?)?.toDouble() ?? 95,
+      efisiensiMsw: (json['efisiensi_msw'] as num?)?.toDouble() ?? 85,
       kapasitasAkiAh: (json['kapasitas_aki_ah'] as num).toDouble(),
       voltAki: (json['volt_aki'] as num?)?.toDouble() ?? 12,
       wpPanel: (json['wp_panel'] as num).toDouble(),

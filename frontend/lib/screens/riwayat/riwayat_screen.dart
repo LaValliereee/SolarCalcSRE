@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/theme.dart';
 import '../../providers/riwayat_provider.dart';
 
 /// Halaman Riwayat: menampilkan daftar proyek perhitungan yang sudah
@@ -35,9 +36,16 @@ class RiwayatScreen extends ConsumerWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.history, size: 48, color: theme.colorScheme.outline),
+                  Icon(
+                    Icons.history,
+                    size: 48,
+                    color: theme.colorScheme.outline,
+                  ),
                   const SizedBox(height: 12),
-                  Text('Belum ada proyek tersimpan', style: theme.textTheme.titleSmall),
+                  Text(
+                    'Belum ada proyek tersimpan',
+                    style: theme.textTheme.titleSmall,
+                  ),
                   const SizedBox(height: 4),
                   Text(
                     'Simpan hasil perhitungan dari tab Hasil untuk melihatnya di sini.',
@@ -70,9 +78,14 @@ class RiwayatScreen extends ConsumerWidget {
                   '${_formatTanggal(proyek.dibuatPada)}',
                 ),
                 trailing: IconButton(
-                  icon: Icon(Icons.delete_outline, color: theme.colorScheme.error),
+                  icon: Icon(Icons.delete_outline, color: AppTheme.toscaDark),
                   tooltip: 'Hapus proyek',
-                  onPressed: () => _konfirmasiHapus(context, ref, proyek.id, proyek.namaProyek),
+                  onPressed: () => _konfirmasiHapus(
+                    context,
+                    ref,
+                    proyek.id,
+                    proyek.namaProyek,
+                  ),
                 ),
               ),
             );
@@ -107,9 +120,7 @@ class RiwayatScreen extends ConsumerWidget {
               ref.read(riwayatProvider.notifier).hapusProyek(id);
               Navigator.pop(context);
             },
-            style: FilledButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.error,
-            ),
+            style: FilledButton.styleFrom(backgroundColor: AppTheme.toscaDark),
             child: const Text('Hapus'),
           ),
         ],

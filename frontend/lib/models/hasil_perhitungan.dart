@@ -15,12 +15,12 @@ class HasilBaterai {
   });
 
   Map<String, dynamic> toJson() => {
-        'jumlah_aki_raw': jumlahAkiRaw,
-        'jumlah_aki': jumlahAki,
-        'jumlah_panel_raw': jumlahPanelRaw,
-        'jumlah_panel': jumlahPanel,
-        'daya_jam_aki_wh': dayaJamAkiWh,
-      };
+    'jumlah_aki_raw': jumlahAkiRaw,
+    'jumlah_aki': jumlahAki,
+    'jumlah_panel_raw': jumlahPanelRaw,
+    'jumlah_panel': jumlahPanel,
+    'daya_jam_aki_wh': dayaJamAkiWh,
+  };
 }
 
 /// Hasil perhitungan lengkap kebutuhan PLTS
@@ -39,9 +39,9 @@ class HasilPerhitungan {
   });
 
   Map<String, dynamic> toJson() => {
-        'total_daya_watt': totalDayaWatt,
-        'total_watt_hours': totalWattHours,
-        'vrla': vrla.toJson(),
-        'lifepo4': lifepo4.toJson(),
-      };
+    'total_daya_watt': totalDayaWatt,
+    'total_watt_hours': totalWattHours,
+    'vrla': vrla.toJson(),
+    'lifepo4': lifepo4.toJson(),
+  };
 }

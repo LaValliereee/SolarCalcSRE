@@ -30,7 +30,8 @@ class DatabaseService {
 
   void _pastikanFfiSiap() {
     if (_ffiInitialized) return;
-    if (!kIsWeb && (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
+    if (!kIsWeb &&
+        (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
       sqfliteFfiInit();
       databaseFactory = databaseFactoryFfi;
     }
@@ -83,10 +84,7 @@ class DatabaseService {
   /// Mengambil semua riwayat proyek, diurutkan dari yang terbaru
   Future<List<RiwayatProyek>> ambilSemuaProyek() async {
     final db = await database;
-    final result = await db.query(
-      _tableName,
-      orderBy: 'dibuat_pada DESC',
-    );
+    final result = await db.query(_tableName, orderBy: 'dibuat_pada DESC');
     return result.map((row) => RiwayatProyek.fromDbMap(row)).toList();
   }
 
@@ -106,11 +104,7 @@ class DatabaseService {
   /// Menghapus satu proyek
   Future<void> hapusProyek(String id) async {
     final db = await database;
-    await db.delete(
-      _tableName,
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    await db.delete(_tableName, where: 'id = ?', whereArgs: [id]);
   }
 
   /// Menghapus seluruh riwayat (dipakai untuk fitur "reset data" opsional)

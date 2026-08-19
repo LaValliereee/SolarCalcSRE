@@ -19,11 +19,7 @@ class BebanItem {
   /// Sesuai rumus kolom F pada file Excel referensi
   double get wattHours => dayaWatt * jamNyala;
 
-  BebanItem copyWith({
-    String? nama,
-    double? dayaWatt,
-    double? jamNyala,
-  }) {
+  BebanItem copyWith({String? nama, double? dayaWatt, double? jamNyala}) {
     return BebanItem(
       id: id,
       nama: nama ?? this.nama,
@@ -33,17 +29,17 @@ class BebanItem {
   }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'nama': nama,
-        'daya_watt': dayaWatt,
-        'jam_nyala': jamNyala,
-        'watt_hours': wattHours,
-      };
+    'id': id,
+    'nama': nama,
+    'daya_watt': dayaWatt,
+    'jam_nyala': jamNyala,
+    'watt_hours': wattHours,
+  };
 
   factory BebanItem.fromJson(Map<String, dynamic> json) => BebanItem(
-        id: json['id'] as String?,
-        nama: json['nama'] as String,
-        dayaWatt: (json['daya_watt'] as num).toDouble(),
-        jamNyala: (json['jam_nyala'] as num).toDouble(),
-      );
+    id: json['id'] as String?,
+    nama: json['nama'] as String,
+    dayaWatt: (json['daya_watt'] as num).toDouble(),
+    jamNyala: (json['jam_nyala'] as num).toDouble(),
+  );
 }

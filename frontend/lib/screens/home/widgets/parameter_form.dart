@@ -59,7 +59,73 @@ class ParameterForm extends ConsumerWidget {
           nilaiAwal: parameter.jamMatahari,
           onChanged: notifier.ubahJamMatahari,
         ),
+        const SizedBox(height: 8),
+        _buildPengaturanLanjutan(context, parameter, notifier),
       ],
+    );
+  }
+
+  Widget _buildPengaturanLanjutan(
+    BuildContext context,
+    ParameterSistem parameter,
+    ParameterNotifier notifier,
+  ) {
+    return Theme(
+      // Hilangkan garis divider default ExpansionTile supaya lebih rapi
+      data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+      child: ExpansionTile(
+        tilePadding: EdgeInsets.zero,
+        childrenPadding: const EdgeInsets.only(top: 8, bottom: 4),
+        title: const Text(
+          'Pengaturan lanjutan',
+          style: TextStyle(fontSize: 13),
+        ),
+        subtitle: const Text(
+          'Sesuaikan efisiensi SCC dan inverter jika sudah tahu spesifikasi produk',
+          style: TextStyle(fontSize: 11),
+        ),
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: _buildInputAngka(
+                  label: 'Efisiensi PWM (%)',
+                  nilaiAwal: parameter.efisiensiPwm,
+                  onChanged: notifier.ubahEfisiensiPwm,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildInputAngka(
+                  label: 'Efisiensi MPPT (%)',
+                  nilaiAwal: parameter.efisiensiMppt,
+                  onChanged: notifier.ubahEfisiensiMppt,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _buildInputAngka(
+                  label: 'Efisiensi PSW (%)',
+                  nilaiAwal: parameter.efisiensiPsw,
+                  onChanged: notifier.ubahEfisiensiPsw,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildInputAngka(
+                  label: 'Efisiensi MSW (%)',
+                  nilaiAwal: parameter.efisiensiMsw,
+                  onChanged: notifier.ubahEfisiensiMsw,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 

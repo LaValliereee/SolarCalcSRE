@@ -16,7 +16,7 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 2,
+      length: 3,
       child: Scaffold(
         appBar: AppBar(
           title: Row(
@@ -29,13 +29,14 @@ class HomeScreen extends StatelessWidget {
                   width: 32,
                   height: 32,
                   fit: BoxFit.contain,
+                  gaplessPlayback: true,
                   errorBuilder: (context, error, stackTrace) => CircleAvatar(
                     radius: 16,
-                    backgroundColor: AppTheme.primaryTeal.withValues(alpha: 0.15),
+                    backgroundColor: AppTheme.primaryTosca.withValues(alpha: 0.15),
                     child: const Icon(
                       Icons.wb_sunny_outlined,
                       size: 18,
-                      color: AppTheme.primaryTeal,
+                      color: AppTheme.primaryTosca,
                     ),
                   ),
                 ),
@@ -48,7 +49,10 @@ class HomeScreen extends StatelessWidget {
                   Text('SolaCalcSRE', style: TextStyle(fontSize: 16)),
                   Text(
                     'Sumber Rejeki Energy',
-                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.normal),
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.normal,
+                    ),
                   ),
                 ],
               ),
@@ -63,11 +67,7 @@ class HomeScreen extends StatelessWidget {
           ),
         ),
         body: const TabBarView(
-          children: [
-            _InputBebanTab(),
-            HasilScreen(),
-            RiwayatScreen(),
-          ],
+          children: [_InputBebanTab(), HasilScreen(), RiwayatScreen()],
         ),
       ),
     );
@@ -83,13 +83,13 @@ class _InputBebanTab extends ConsumerWidget {
     final theme = Theme.of(context);
 
     return ListView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
       children: [
         Text('Daftar beban listrik', style: theme.textTheme.titleSmall),
-        const SizedBox(height: 10),
+        const SizedBox(height: 8),
         if (bebanList.isEmpty)
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16),
+            padding: const EdgeInsets.symmetric(vertical: 12),
             child: Text(
               'Belum ada beban. Tambahkan lewat tombol di bawah.',
               style: theme.textTheme.bodySmall?.copyWith(
@@ -105,7 +105,7 @@ class _InputBebanTab extends ConsumerWidget {
                   ref.read(bebanProvider.notifier).hapusBeban(item.id),
             ),
           ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 6),
         OutlinedButton.icon(
           onPressed: () => _tampilkanDialogTambahBeban(context, ref),
           icon: const Icon(Icons.add),
@@ -114,7 +114,7 @@ class _InputBebanTab extends ConsumerWidget {
             minimumSize: const Size.fromHeight(44),
           ),
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 16),
         const ParameterForm(),
       ],
     );
@@ -138,10 +138,13 @@ class _InputBebanTab extends ConsumerWidget {
               children: [
                 TextFormField(
                   controller: namaController,
-                  decoration: const InputDecoration(labelText: 'Nama alat/ruangan'),
+                  decoration: const InputDecoration(
+                    labelText: 'Nama alat/ruangan',
+                  ),
                   validator: (v) =>
                       (v == null || v.trim().isEmpty) ? 'Wajib diisi' : null,
                 ),
+                const SizedBox(height: 12),
                 TextFormField(
                   controller: dayaController,
                   decoration: const InputDecoration(labelText: 'Daya (watt)'),
@@ -152,9 +155,12 @@ class _InputBebanTab extends ConsumerWidget {
                     return null;
                   },
                 ),
+                const SizedBox(height: 12),
                 TextFormField(
                   controller: jamController,
-                  decoration: const InputDecoration(labelText: 'Jam nyala per hari'),
+                  decoration: const InputDecoration(
+                    labelText: 'Jam nyala per hari',
+                  ),
                   keyboardType: TextInputType.number,
                   validator: (v) {
                     final n = double.tryParse(v ?? '');
@@ -175,7 +181,9 @@ class _InputBebanTab extends ConsumerWidget {
             FilledButton(
               onPressed: () {
                 if (!formKey.currentState!.validate()) return;
-                ref.read(bebanProvider.notifier).tambahBeban(
+                ref
+                    .read(bebanProvider.notifier)
+                    .tambahBeban(
                       nama: namaController.text.trim(),
                       dayaWatt: double.parse(dayaController.text),
                       jamNyala: double.parse(jamController.text),

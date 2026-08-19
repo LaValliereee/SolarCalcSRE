@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/theme.dart';
 import '../../../models/beban_item.dart';
 
 /// Kartu untuk menampilkan satu item beban (nama, daya, jam nyala)
@@ -19,7 +20,7 @@ class BebanCard extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Card(
-      margin: const EdgeInsets.only(bottom: 8),
+      margin: const EdgeInsets.only(bottom: 12),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
         title: Text(
@@ -33,7 +34,7 @@ class BebanCard extends StatelessWidget {
           ),
         ),
         trailing: IconButton(
-          icon: Icon(Icons.delete_outline, color: theme.colorScheme.error),
+          icon: Icon(Icons.delete_outline, color: AppTheme.toscaDark),
           onPressed: onHapus,
           tooltip: 'Hapus beban',
         ),

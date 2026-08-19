@@ -24,6 +24,22 @@ class ParameterNotifier extends Notifier<ParameterSistem> {
     state = state.copyWith(jenisInverter: jenis);
   }
 
+  void ubahEfisiensiPwm(double persen) {
+    state = state.copyWith(efisiensiPwm: persen);
+  }
+
+  void ubahEfisiensiMppt(double persen) {
+    state = state.copyWith(efisiensiMppt: persen);
+  }
+
+  void ubahEfisiensiPsw(double persen) {
+    state = state.copyWith(efisiensiPsw: persen);
+  }
+
+  void ubahEfisiensiMsw(double persen) {
+    state = state.copyWith(efisiensiMsw: persen);
+  }
+
   void ubahKapasitasAki(double ah) {
     state = state.copyWith(kapasitasAkiAh: ah);
   }

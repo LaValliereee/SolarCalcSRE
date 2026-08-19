@@ -13,6 +13,10 @@ import '../models/parameter_sistem.dart';
 /// `printing` untuk membuka dialog cetak/bagikan/simpan bawaan platform
 /// (browser print dialog di web, share sheet di Android/iOS).
 class PdfExportService {
+  // Warna tosca untuk PDF — diambil dari brand color
+  static final PdfColor _toscaHeaderBg = PdfColor.fromHex('#E0F2F1');
+  static final PdfColor _toscaAccent = PdfColor.fromHex('#0D9488');
+
   /// Generate PDF lalu langsung tampilkan dialog cetak/bagikan/simpan.
   /// Dipanggil dari tombol "Export PDF" di HasilScreen.
   static Future<void> exportDanBagikan({
@@ -76,11 +80,18 @@ class PdfExportService {
       children: [
         pw.Text(
           'Laporan Kebutuhan PLTS',
-          style: pw.TextStyle(fontSize: 20, fontWeight: pw.FontWeight.bold),
+          style: pw.TextStyle(
+            fontSize: 20,
+            fontWeight: pw.FontWeight.bold,
+            color: _toscaAccent,
+          ),
         ),
         pw.SizedBox(height: 4),
         pw.Text('Proyek: $namaProyek', style: const pw.TextStyle(fontSize: 12)),
-        pw.Text('Tanggal: $tanggal', style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700)),
+        pw.Text(
+          'Tanggal: $tanggal',
+          style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700),
+        ),
         pw.Divider(),
       ],
     );
@@ -90,8 +101,14 @@ class PdfExportService {
     return pw.Row(
       mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
       children: [
-        _buildRingkasanItem('Total Watt Hours', '${hasil.totalWattHours.toStringAsFixed(0)} Wh'),
-        _buildRingkasanItem('Total Daya', '${hasil.totalDayaWatt.toStringAsFixed(0)} W'),
+        _buildRingkasanItem(
+          'Total Watt Hours',
+          '${hasil.totalWattHours.toStringAsFixed(0)} Wh',
+        ),
+        _buildRingkasanItem(
+          'Total Daya',
+          '${hasil.totalDayaWatt.toStringAsFixed(0)} W',
+        ),
       ],
     );
   }
@@ -100,8 +117,14 @@ class PdfExportService {
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
-        pw.Text(label, style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700)),
-        pw.Text(value, style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold)),
+        pw.Text(
+          label,
+          style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700),
+        ),
+        pw.Text(
+          value,
+          style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold),
+        ),
       ],
     );
   }
@@ -110,12 +133,18 @@ class PdfExportService {
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
-        pw.Text('Daftar Beban Listrik', style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold)),
+        pw.Text(
+          'Daftar Beban Listrik',
+          style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
+        ),
         pw.SizedBox(height: 6),
         pw.TableHelper.fromTextArray(
-          headerStyle: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold),
+          headerStyle: pw.TextStyle(
+            fontSize: 9,
+            fontWeight: pw.FontWeight.bold,
+          ),
           cellStyle: const pw.TextStyle(fontSize: 9),
-          headerDecoration: const pw.BoxDecoration(color: PdfColors.grey300),
+          headerDecoration: pw.BoxDecoration(color: _toscaHeaderBg),
           cellAlignments: {
             0: pw.Alignment.centerLeft,
             1: pw.Alignment.centerRight,
@@ -124,12 +153,14 @@ class PdfExportService {
           },
           headers: ['Nama', 'Daya (W)', 'Jam nyala', 'Watt Hours'],
           data: bebanList
-              .map((item) => [
-                    item.nama,
-                    item.dayaWatt.toStringAsFixed(0),
-                    item.jamNyala.toStringAsFixed(0),
-                    item.wattHours.toStringAsFixed(0),
-                  ])
+              .map(
+                (item) => [
+                  item.nama,
+                  item.dayaWatt.toStringAsFixed(0),
+                  item.jamNyala.toStringAsFixed(0),
+                  item.wattHours.toStringAsFixed(0),
+                ],
+              )
               .toList(),
         ),
       ],
@@ -140,20 +171,32 @@ class PdfExportService {
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
-        pw.Text('Parameter Sistem', style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold)),
+        pw.Text(
+          'Parameter Sistem',
+          style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
+        ),
         pw.SizedBox(height: 6),
         pw.TableHelper.fromTextArray(
-          headerStyle: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold),
+          headerStyle: pw.TextStyle(
+            fontSize: 9,
+            fontWeight: pw.FontWeight.bold,
+          ),
           cellStyle: const pw.TextStyle(fontSize: 9),
-          headerDecoration: const pw.BoxDecoration(color: PdfColors.grey300),
+          headerDecoration: pw.BoxDecoration(color: _toscaHeaderBg),
           headers: ['Parameter', 'Nilai'],
           data: [
             ['Jenis SCC', parameter.jenisScc.name.toUpperCase()],
             ['Jenis Inverter', parameter.jenisInverter.name.toUpperCase()],
-            ['Kapasitas Aki', '${parameter.kapasitasAkiAh.toStringAsFixed(0)} Ah'],
+            [
+              'Kapasitas Aki',
+              '${parameter.kapasitasAkiAh.toStringAsFixed(0)} Ah',
+            ],
             ['Tegangan Aki', '${parameter.voltAki.toStringAsFixed(0)} V'],
             ['Wp Panel', '${parameter.wpPanel.toStringAsFixed(0)} Wp'],
-            ['Jam Matahari Efektif', '${parameter.jamMatahari.toStringAsFixed(0)} jam'],
+            [
+              'Jam Matahari Efektif',
+              '${parameter.jamMatahari.toStringAsFixed(0)} jam',
+            ],
           ],
         ),
       ],
@@ -164,16 +207,30 @@ class PdfExportService {
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
-        pw.Text('Perbandingan Jenis Baterai', style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold)),
+        pw.Text(
+          'Perbandingan Jenis Baterai',
+          style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
+        ),
         pw.SizedBox(height: 6),
         pw.TableHelper.fromTextArray(
-          headerStyle: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold),
+          headerStyle: pw.TextStyle(
+            fontSize: 9,
+            fontWeight: pw.FontWeight.bold,
+          ),
           cellStyle: const pw.TextStyle(fontSize: 9),
-          headerDecoration: const pw.BoxDecoration(color: PdfColors.grey300),
+          headerDecoration: pw.BoxDecoration(color: _toscaHeaderBg),
           headers: ['Jenis Baterai', 'Jumlah Aki', 'Jumlah Panel'],
           data: [
-            ['VRLA (DoD 50%)', '${hasil.vrla.jumlahAki}', '${hasil.vrla.jumlahPanel}'],
-            ['LiFePO4 (DoD 80%)', '${hasil.lifepo4.jumlahAki}', '${hasil.lifepo4.jumlahPanel}'],
+            [
+              'VRLA (DoD 50%)',
+              '${hasil.vrla.jumlahAki}',
+              '${hasil.vrla.jumlahPanel}',
+            ],
+            [
+              'LiFePO4 (DoD 80%)',
+              '${hasil.lifepo4.jumlahAki}',
+              '${hasil.lifepo4.jumlahPanel}',
+            ],
           ],
         ),
       ],
