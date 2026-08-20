@@ -212,6 +212,7 @@ class _InputBebanTab extends ConsumerWidget {
                   validator: (v) {
                     final n = double.tryParse(v ?? '');
                     if (n == null || n <= 0) return 'Harus angka > 0';
+                    if (n > 10000) return 'Maksimal 10.000 W';
                     return null;
                   },
                 ),

@@ -3,11 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../models/parameter_sistem.dart';
 import '../../../providers/parameter_provider.dart';
+import 'validated_number_field.dart';
 
 /// Form untuk mengatur parameter sistem PLTS: jenis SCC, jenis inverter,
-/// kapasitas aki, dan Wp panel. Terhubung langsung ke parameterProvider,
-/// setiap perubahan langsung ter-update di state (dan otomatis memicu
-/// hitung ulang di hasilPerhitunganProvider).
+/// kapasitas aki, tegangan aki, Wp panel, jam matahari efektif, dan
+/// pengaturan lanjutan (efisiensi custom). Semua input angka divalidasi
+/// batas wajarnya lewat ValidatedNumberField, supaya provider tidak
+/// pernah menerima nilai 0/negatif yang bisa merusak hasil perhitungan.
 class ParameterForm extends ConsumerWidget {
   const ParameterForm({super.key});
 
@@ -24,41 +26,43 @@ class ParameterForm extends ConsumerWidget {
         const SizedBox(height: 8),
         Row(
           children: [
-            Expanded(
-              child: _buildDropdownScc(parameter, notifier),
-            ),
+            Expanded(child: _buildDropdownScc(parameter, notifier)),
             const SizedBox(width: 12),
-            Expanded(
-              child: _buildDropdownInverter(parameter, notifier),
-            ),
+            Expanded(child: _buildDropdownInverter(parameter, notifier)),
           ],
         ),
         const SizedBox(height: 12),
         Row(
           children: [
             Expanded(
-              child: _buildInputAngka(
+              child: ValidatedNumberField(
                 label: 'Kapasitas aki (Ah)',
-                nilaiAwal: parameter.kapasitasAkiAh,
+                initialValue: parameter.kapasitasAkiAh,
+                min: 1,
+                max: 10000,
                 onChanged: notifier.ubahKapasitasAki,
               ),
             ),
             const SizedBox(width: 12),
-            Expanded(
-              child: _buildDropdownVolt(parameter, notifier),
-            ),
+            Expanded(child: _buildDropdownVolt(parameter, notifier)),
           ],
         ),
         const SizedBox(height: 12),
-        _buildInputAngka(
+        ValidatedNumberField(
           label: 'Wp panel',
-          nilaiAwal: parameter.wpPanel,
+          initialValue: parameter.wpPanel,
+          min: 1,
+          max: 2000,
+          suffixText: 'Wp',
           onChanged: notifier.ubahWpPanel,
         ),
         const SizedBox(height: 12),
-        _buildInputAngka(
+        ValidatedNumberField(
           label: 'Jam matahari efektif',
-          nilaiAwal: parameter.jamMatahari,
+          initialValue: parameter.jamMatahari,
+          min: 1,
+          max: 8,
+          suffixText: 'jam',
           onChanged: notifier.ubahJamMatahari,
         ),
         const SizedBox(height: 8),
@@ -73,15 +77,11 @@ class ParameterForm extends ConsumerWidget {
     ParameterNotifier notifier,
   ) {
     return Theme(
-      // Hilangkan garis divider default ExpansionTile supaya lebih rapi
       data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
       child: ExpansionTile(
         tilePadding: EdgeInsets.zero,
         childrenPadding: const EdgeInsets.only(top: 8, bottom: 4),
-        title: const Text(
-          'Pengaturan lanjutan',
-          style: TextStyle(fontSize: 13),
-        ),
+        title: const Text('Pengaturan lanjutan', style: TextStyle(fontSize: 13)),
         subtitle: const Text(
           'Sesuaikan efisiensi SCC dan inverter jika sudah tahu spesifikasi produk',
           style: TextStyle(fontSize: 11),
@@ -90,17 +90,23 @@ class ParameterForm extends ConsumerWidget {
           Row(
             children: [
               Expanded(
-                child: _buildInputAngka(
-                  label: 'Efisiensi PWM (%)',
-                  nilaiAwal: parameter.efisiensiPwm,
+                child: ValidatedNumberField(
+                  label: 'Efisiensi PWM',
+                  initialValue: parameter.efisiensiPwm,
+                  min: 1,
+                  max: 100,
+                  suffixText: '%',
                   onChanged: notifier.ubahEfisiensiPwm,
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: _buildInputAngka(
-                  label: 'Efisiensi MPPT (%)',
-                  nilaiAwal: parameter.efisiensiMppt,
+                child: ValidatedNumberField(
+                  label: 'Efisiensi MPPT',
+                  initialValue: parameter.efisiensiMppt,
+                  min: 1,
+                  max: 100,
+                  suffixText: '%',
                   onChanged: notifier.ubahEfisiensiMppt,
                 ),
               ),
@@ -110,17 +116,23 @@ class ParameterForm extends ConsumerWidget {
           Row(
             children: [
               Expanded(
-                child: _buildInputAngka(
-                  label: 'Efisiensi PSW (%)',
-                  nilaiAwal: parameter.efisiensiPsw,
+                child: ValidatedNumberField(
+                  label: 'Efisiensi PSW',
+                  initialValue: parameter.efisiensiPsw,
+                  min: 1,
+                  max: 100,
+                  suffixText: '%',
                   onChanged: notifier.ubahEfisiensiPsw,
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: _buildInputAngka(
-                  label: 'Efisiensi MSW (%)',
-                  nilaiAwal: parameter.efisiensiMsw,
+                child: ValidatedNumberField(
+                  label: 'Efisiensi MSW',
+                  initialValue: parameter.efisiensiMsw,
+                  min: 1,
+                  max: 100,
+                  suffixText: '%',
                   onChanged: notifier.ubahEfisiensiMsw,
                 ),
               ),
@@ -132,8 +144,6 @@ class ParameterForm extends ConsumerWidget {
   }
 
   Widget _buildDropdownVolt(ParameterSistem parameter, ParameterNotifier notifier) {
-    // Tegangan aki standar di pasaran, bukan input bebas,
-    // supaya user tidak salah masukkan nilai yang tidak ada produknya.
     const pilihanVolt = [12.0, 24.0, 48.0];
     final nilaiSekarang =
         pilihanVolt.contains(parameter.voltAki) ? parameter.voltAki : 12.0;
@@ -190,28 +200,6 @@ class ParameterForm extends ConsumerWidget {
       ],
       onChanged: (value) {
         if (value != null) notifier.ubahJenisInverter(value);
-      },
-    );
-  }
-
-  Widget _buildInputAngka({
-    required String label,
-    required double nilaiAwal,
-    required ValueChanged<double> onChanged,
-  }) {
-    return TextFormField(
-      initialValue: nilaiAwal.toStringAsFixed(0),
-      decoration: InputDecoration(
-        labelText: label,
-        border: const OutlineInputBorder(),
-        isDense: true,
-      ),
-      keyboardType: TextInputType.number,
-      onChanged: (text) {
-        final nilai = double.tryParse(text);
-        if (nilai != null && nilai > 0) {
-          onChanged(nilai);
-        }
       },
     );
   }
