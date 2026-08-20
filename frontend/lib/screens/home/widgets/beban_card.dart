@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/theme.dart';
 import '../../../models/beban_item.dart';
 
 /// Kartu untuk menampilkan satu item beban (nama, daya, jam nyala)
-/// dengan tombol hapus. Dipakai di HomeScreen dalam ListView.builder.
+/// dengan tombol hapus. Tap kartu untuk edit item ini.
+/// Dipakai di HomeScreen dalam ListView.builder.
 class BebanCard extends StatelessWidget {
   final BebanItem beban;
   final VoidCallback onHapus;
+  final VoidCallback onTap;
 
   const BebanCard({
     super.key,
     required this.beban,
     required this.onHapus,
+    required this.onTap,
   });
 
   @override
@@ -20,8 +22,9 @@ class BebanCard extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Card(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
+        onTap: onTap,
         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
         title: Text(
           beban.nama,
@@ -34,7 +37,7 @@ class BebanCard extends StatelessWidget {
           ),
         ),
         trailing: IconButton(
-          icon: Icon(Icons.delete_outline, color: AppTheme.toscaDark),
+          icon: Icon(Icons.delete_outline, color: theme.colorScheme.error),
           onPressed: onHapus,
           tooltip: 'Hapus beban',
         ),

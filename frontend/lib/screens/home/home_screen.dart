@@ -2,19 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme.dart';
+import '../../models/beban_item.dart';
 import '../../providers/beban_provider.dart';
+import '../../providers/parameter_provider.dart';
 import '../hasil/hasil_screen.dart';
 import '../riwayat/riwayat_screen.dart';
 import 'widgets/beban_card.dart';
 import 'widgets/parameter_form.dart';
 
-/// Halaman utama aplikasi: TabBar dengan 2 tab (Input beban, Hasil).
-/// Header menampilkan nama aplikasi "SolaCalcSRE" sesuai mockup.
-class HomeScreen extends StatelessWidget {
+/// Halaman utama aplikasi: TabBar dengan 3 tab (Input beban, Hasil, Riwayat).
+/// Header menampilkan logo & nama aplikasi, plus tombol reset di kanan atas.
+class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return DefaultTabController(
       length: 3,
       child: Scaffold(
@@ -58,6 +60,13 @@ class HomeScreen extends StatelessWidget {
               ),
             ],
           ),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.restart_alt),
+              tooltip: 'Proyek baru',
+              onPressed: () => _konfirmasiReset(context, ref),
+            ),
+          ],
           bottom: const TabBar(
             tabs: [
               Tab(text: 'Input beban'),
@@ -69,6 +78,43 @@ class HomeScreen extends StatelessWidget {
         body: const TabBarView(
           children: [_InputBebanTab(), HasilScreen(), RiwayatScreen()],
         ),
+      ),
+    );
+  }
+
+  void _konfirmasiReset(BuildContext context, WidgetRef ref) {
+    final bebanList = ref.read(bebanProvider);
+
+    if (bebanList.isEmpty) {
+      // Tidak ada apa-apa untuk direset, tidak perlu tanya konfirmasi
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Mulai proyek baru?'),
+        content: const Text(
+          'Semua beban dan parameter yang sedang diisi akan dihapus. '
+          'Pastikan sudah disimpan lewat tab Hasil kalau masih diperlukan.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Batal'),
+          ),
+          FilledButton(
+            onPressed: () {
+              ref.read(bebanProvider.notifier).resetBeban();
+              ref.read(parameterProvider.notifier).reset();
+              Navigator.pop(context);
+            },
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+            child: const Text('Reset'),
+          ),
+        ],
       ),
     );
   }
@@ -103,11 +149,12 @@ class _InputBebanTab extends ConsumerWidget {
               beban: item,
               onHapus: () =>
                   ref.read(bebanProvider.notifier).hapusBeban(item.id),
+              onTap: () => _tampilkanDialogBeban(context, ref, bebanLama: item),
             ),
           ),
         const SizedBox(height: 6),
         OutlinedButton.icon(
-          onPressed: () => _tampilkanDialogTambahBeban(context, ref),
+          onPressed: () => _tampilkanDialogBeban(context, ref),
           icon: const Icon(Icons.add),
           label: const Text('Tambah beban'),
           style: OutlinedButton.styleFrom(
@@ -120,17 +167,29 @@ class _InputBebanTab extends ConsumerWidget {
     );
   }
 
-  void _tampilkanDialogTambahBeban(BuildContext context, WidgetRef ref) {
-    final namaController = TextEditingController();
-    final dayaController = TextEditingController();
-    final jamController = TextEditingController();
+  /// Dialog untuk tambah beban baru ATAU edit beban lama, tergantung
+  /// apakah [bebanLama] diisi. Kalau diisi, form otomatis ter-prefill
+  /// dengan nilai lama dan tombol berubah jadi "Simpan" bukan "Tambah".
+  void _tampilkanDialogBeban(
+    BuildContext context,
+    WidgetRef ref, {
+    BebanItem? bebanLama,
+  }) {
+    final isEdit = bebanLama != null;
+    final namaController = TextEditingController(text: bebanLama?.nama ?? '');
+    final dayaController = TextEditingController(
+      text: bebanLama != null ? bebanLama.dayaWatt.toStringAsFixed(0) : '',
+    );
+    final jamController = TextEditingController(
+      text: bebanLama != null ? bebanLama.jamNyala.toStringAsFixed(0) : '',
+    );
     final formKey = GlobalKey<FormState>();
 
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Tambah beban'),
+          title: Text(isEdit ? 'Edit beban' : 'Tambah beban'),
           content: Form(
             key: formKey,
             child: Column(
@@ -138,6 +197,7 @@ class _InputBebanTab extends ConsumerWidget {
               children: [
                 TextFormField(
                   controller: namaController,
+                  autofocus: true,
                   decoration: const InputDecoration(
                     labelText: 'Nama alat/ruangan',
                   ),
@@ -174,6 +234,17 @@ class _InputBebanTab extends ConsumerWidget {
             ),
           ),
           actions: [
+            if (isEdit)
+              TextButton(
+                onPressed: () {
+                  ref.read(bebanProvider.notifier).hapusBeban(bebanLama.id);
+                  Navigator.pop(context);
+                },
+                style: TextButton.styleFrom(
+                  foregroundColor: Theme.of(context).colorScheme.error,
+                ),
+                child: const Text('Hapus'),
+              ),
             TextButton(
               onPressed: () => Navigator.pop(context),
               child: const Text('Batal'),
@@ -181,16 +252,27 @@ class _InputBebanTab extends ConsumerWidget {
             FilledButton(
               onPressed: () {
                 if (!formKey.currentState!.validate()) return;
-                ref
-                    .read(bebanProvider.notifier)
-                    .tambahBeban(
-                      nama: namaController.text.trim(),
-                      dayaWatt: double.parse(dayaController.text),
-                      jamNyala: double.parse(jamController.text),
-                    );
+                final nama = namaController.text.trim();
+                final daya = double.parse(dayaController.text);
+                final jam = double.parse(jamController.text);
+
+                if (isEdit) {
+                  ref.read(bebanProvider.notifier).editBeban(
+                        bebanLama.id,
+                        nama: nama,
+                        dayaWatt: daya,
+                        jamNyala: jam,
+                      );
+                } else {
+                  ref.read(bebanProvider.notifier).tambahBeban(
+                        nama: nama,
+                        dayaWatt: daya,
+                        jamNyala: jam,
+                      );
+                }
                 Navigator.pop(context);
               },
-              child: const Text('Tambah'),
+              child: Text(isEdit ? 'Simpan' : 'Tambah'),
             ),
           ],
         );

@@ -45,13 +45,15 @@ class ParameterForm extends ConsumerWidget {
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: _buildInputAngka(
-                label: 'Wp panel',
-                nilaiAwal: parameter.wpPanel,
-                onChanged: notifier.ubahWpPanel,
-              ),
+              child: _buildDropdownVolt(parameter, notifier),
             ),
           ],
+        ),
+        const SizedBox(height: 12),
+        _buildInputAngka(
+          label: 'Wp panel',
+          nilaiAwal: parameter.wpPanel,
+          onChanged: notifier.ubahWpPanel,
         ),
         const SizedBox(height: 12),
         _buildInputAngka(
@@ -126,6 +128,32 @@ class ParameterForm extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildDropdownVolt(ParameterSistem parameter, ParameterNotifier notifier) {
+    // Tegangan aki standar di pasaran, bukan input bebas,
+    // supaya user tidak salah masukkan nilai yang tidak ada produknya.
+    const pilihanVolt = [12.0, 24.0, 48.0];
+    final nilaiSekarang =
+        pilihanVolt.contains(parameter.voltAki) ? parameter.voltAki : 12.0;
+
+    return DropdownButtonFormField<double>(
+      initialValue: nilaiSekarang,
+      decoration: const InputDecoration(
+        labelText: 'Tegangan aki',
+        border: OutlineInputBorder(),
+        isDense: true,
+      ),
+      items: pilihanVolt
+          .map((volt) => DropdownMenuItem(
+                value: volt,
+                child: Text('${volt.toStringAsFixed(0)} V'),
+              ))
+          .toList(),
+      onChanged: (value) {
+        if (value != null) notifier.ubahVoltAki(value);
+      },
     );
   }
 
